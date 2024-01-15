@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     int num = atoi(argv[argc-1]);
 
     int res = foo(num);
-    printf("Current process id: %d, Current result: %d\n", (int) getpid(), res);
+    printf("Half: Current process id: %d, Current result: %d\n", (int) getpid(), res);
 
     sprintf(argv[argc-1], "%d", res);
 

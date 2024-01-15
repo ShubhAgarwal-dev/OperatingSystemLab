@@ -1,0 +1,4 @@
+CC=clang
+
+copy:
+	cp 
