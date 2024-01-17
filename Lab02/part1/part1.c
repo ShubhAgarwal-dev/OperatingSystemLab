@@ -8,7 +8,7 @@ int main() {
     for (int i = 0; i < 11; i++) {
 		printf("%c %d\n", message[i], getpid());
 		sleep(rand() % 4 + 1);
-		if (fork() != 0){
+		if (fork() != 0) {
             wait(NULL);
 			break;
 		}

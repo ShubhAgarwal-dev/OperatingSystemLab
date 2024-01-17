@@ -102,7 +102,7 @@ do_fork(void)
 	rmc->mp_scheduler = SCHED_PROC_NR;
   }
   
-  printf("Minix (210020047): PID %d created (Endpoint: %d)\n", rmc->mp_pid, _ENDPOINT_P(rmc->mp_endpoint));
+  printf("Minix (210020047): PID %d created\n", rmc->mp_pid);
 
   /* Inherit only these flags. In normal fork(), PRIV_PROC is not inherited. */
   rmc->mp_flags &= (IN_USE|DELAY_CALL|TAINTED);
@@ -261,7 +261,7 @@ do_exit(void)
       exit_proc(mp, m_in.m_lc_pm_exit.status, FALSE /*dump_core*/);
   }
   
-  printf("Minix (210020047): PID %d exited (Endpoint %d)\n", mp->mp_pid, _ENDPOINT_P(mp->mp_endpoint));
+  printf("Minix (210020047): PID %d exited\n", mp->mp_pid);
   return(SUSPEND);		/* can't communicate from beyond the grave */
 }
 
