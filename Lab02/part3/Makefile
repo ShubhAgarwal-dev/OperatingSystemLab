@@ -20,4 +20,6 @@ reset:
 
 clean: reset
 
+make: reboot
+
 .PHONY: clean
