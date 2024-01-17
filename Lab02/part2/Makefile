@@ -1,5 +1,7 @@
 CC=clang
 
+make: compile
+
 half:
 	$(CC) -std=c11 half.c -o half
 
