@@ -3,6 +3,23 @@
 
 using namespace std;
 
+bool print_process(Process process);
+
+bool CompareBurst ::operator()(Process a, Process b)
+{
+    return a.bursts[0] > b.bursts[0];
+};
+
+bool CompareIO ::operator()(Process a, Process b)
+{
+    return a.io[0] > a.io[0];
+};
+
+bool CompareArrival::operator()(Process a, Process b)
+{
+    return a.arrival_time > b.arrival_time;
+};
+
 vector<Process> read_file(const string &filename)
 {
     vector<Process> Processes;
@@ -58,8 +75,8 @@ vector<Process> read_file(const string &filename)
     }
 
     myfile.close();
-    for (auto i: Processes)
-        DEBUG_MODE && print_process(i);
+    for (auto i : Processes)
+        DEBUG_MODE &&print_process(i);
     return Processes;
 }
 

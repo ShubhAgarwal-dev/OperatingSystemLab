@@ -3,33 +3,6 @@
 
 using namespace std;
 
-class CompareBurst
-{
-public:
-    bool operator()(Process a, Process b)
-    {
-        return a.bursts[0] > b.bursts[0];
-    }
-};
-
-class CompareIO
-{
-public:
-    bool operator()(Process a, Process b)
-    {
-        return a.io[0] > a.io[0];
-    }
-};
-
-class CompareArrival
-{
-public:
-    bool operator()(Process a, Process b)
-    {
-        return a.arrival_time > b.arrival_time;
-    }
-};
-
 class SJF
 {
 private:
@@ -129,10 +102,7 @@ int main(int argc, char *argv[])
 
     SJF sjf;
     for (auto i : Processes)
-    {
-        num_processes++;
         sjf.add_to_waitlisted_queue(i);
-    }
 
     int time = 0;
     int context_switches = -1;
@@ -146,15 +116,26 @@ int main(int argc, char *argv[])
                           << endl;
     }
 
+    cout << "Process" << "\t" << "Waiting Time" << "\t" << "Turnaround Time" << "\t" << "Penalty Ratio" << endl;
+    for (auto i : sjf.get_finished())
+        cout << i.pid << "\t" << i.turnaround_time << "\t" << i.waiting_time << "\t" << (double)i.turnaround_time / (i.turnaround_time - i.waiting_time) << endl;
+
+    cout << endl;
+
     int total_waiting_time = 0;
     int total_turnaround_time = 0;
     float total_penalty_ratio = 0;
-    for (Process process : sjf.get_finished())
+    for (auto process : sjf.get_finished())
     {
+        num_processes++;
         total_waiting_time += process.waiting_time;
         total_turnaround_time += process.turnaround_time;
         total_penalty_ratio += (float)process.turnaround_time / (process.turnaround_time - process.waiting_time);
     }
 
-    cout << (double)total_waiting_time / num_processes << "\t" << (double)total_turnaround_time / num_processes << "\t" << (double)total_penalty_ratio / num_processes << endl;
+    cout << "Average waiting time: " << (double)total_waiting_time / num_processes << endl;
+    cout << "Average turnaround time: " << (double)total_turnaround_time / num_processes << endl;
+    cout << "Average penalty ration: " << (double)total_penalty_ratio / num_processes << endl;
+
+    return 0;
 }
