@@ -1,13 +1,21 @@
-#ifndef __IITDH_CS321_LAB04_UTILS__
-#define __IITDH_CS321_LAB04_UTILS__
+#ifndef __IITDH_CS312_LAB04_UTILS__
+#define __IITDH_CS312_LAB04_UTILS__
 
 #include <bits/stdc++.h>
+#define DEBUG_MODE 0
 
-typedef struct Process {
+typedef struct Process
+{
+    pid_t pid;
     int arrival_time;
     std::vector<int> bursts;
+    std::vector<int> io;
+    int turnaround_time;
+    int waiting_time;
 } Process;
 
-void read_file(const std::string &filename);
+bool print_process(Process process);
 
-#endif //__IITDH_CS321_LAB04_UTILS__
+std::vector<Process> read_file(const std::string &filename);
+
+#endif //__IITDH_CS312_LAB04_UTILS__

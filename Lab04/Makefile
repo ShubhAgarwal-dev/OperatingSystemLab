@@ -1,4 +1,4 @@
-CC=clang++
+CC=g++
 
 build1: SJF.cpp
 	${CC} -o sjf SJF.cpp utils.cpp
