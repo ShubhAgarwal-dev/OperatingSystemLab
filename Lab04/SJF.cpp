@@ -116,7 +116,13 @@ int main(int argc, char *argv[])
                           << endl;
     }
 
-    cout << "Process" << "\t" << "Waiting Time" << "\t" << "Turnaround Time" << "\t" << "Penalty Ratio" << endl;
+    cout << "Process"
+         << "\t"
+         << "Waiting Time"
+         << "\t"
+         << "Turnaround Time"
+         << "\t"
+         << "Penalty Ratio" << endl;
     for (auto i : sjf.get_finished())
         cout << i.pid << "\t" << i.turnaround_time << "\t" << i.waiting_time << "\t" << (double)i.turnaround_time / (i.turnaround_time - i.waiting_time) << endl;
 
@@ -136,6 +142,8 @@ int main(int argc, char *argv[])
     cout << "Average waiting time: " << (double)total_waiting_time / num_processes << endl;
     cout << "Average turnaround time: " << (double)total_turnaround_time / num_processes << endl;
     cout << "Average penalty ration: " << (double)total_penalty_ratio / num_processes << endl;
+    double throughput = (double) num_processes/(time + context_switches*CONTEXT_SWITCH_OVERHEAD);
+    cout << "System Throughput: " << throughput << endl;
 
     return 0;
 }

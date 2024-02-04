@@ -3,6 +3,7 @@
 
 #include <bits/stdc++.h>
 #define DEBUG_MODE 0
+#define CONTEXT_SWITCH_OVERHEAD 1
 
 typedef struct Process
 {
