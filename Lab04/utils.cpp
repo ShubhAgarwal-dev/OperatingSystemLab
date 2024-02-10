@@ -5,12 +5,12 @@ using namespace std;
 
 bool print_process(Process process);
 
-bool CompareBurst ::operator()(Process a, Process b)
+bool CompareBurst::operator()(Process a, Process b)
 {
     return a.bursts[0] > b.bursts[0];
 };
 
-bool CompareIO ::operator()(Process a, Process b)
+bool CompareIO::operator()(Process a, Process b)
 {
     return a.io[0] > a.io[0];
 };

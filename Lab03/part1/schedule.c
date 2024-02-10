@@ -325,8 +325,7 @@ static int schedule_process(struct schedproc * rmp, unsigned flags)
 		rmp->endpoint, err);
 	}
 
-	if(rmp->priority >= 1)
-		printf("Minix (210020047): PID %d swapped in\n", _ENDPOINT_P(rmp->endpoint));
+	printf("Minix (210020047): PID %d swapped in\n", _ENDPOINT_P(rmp->endpoint));
 
 	return err;
 }
