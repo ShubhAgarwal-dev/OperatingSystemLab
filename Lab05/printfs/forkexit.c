@@ -113,7 +113,7 @@ int do_fork()
   new_pid = get_free_pid();
   rmc->mp_pid = new_pid;	/* assign pid to child */
 
-  printf("Minix (210020047): PID %d created\n", _ENDPOINT_P(rmc->mp_pid));
+  printf("Minix (210020047): PID %d created with endpoint %d\n", rmc->mp_pid, _ENDPOINT_P(rmc->mp_endpoint));
 
   memset(&m, 0, sizeof(m));
   m.m_type = VFS_PM_FORK;
@@ -207,8 +207,7 @@ int do_srv_fork()
   new_pid = get_free_pid();
   rmc->mp_pid = new_pid;	/* assign pid to child */
 
-  printf("Minix (210020047): PID %d created\n", _ENDPOINT_P(rmc->mp_pid));
-
+  printf("Minix (210020047): PID %d created with endpoint %d\n", rmc->mp_pid, _ENDPOINT_P(rmc->mp_endpoint));
   memset(&m, 0, sizeof(m));
   m.m_type = VFS_PM_SRV_FORK;
   m.VFS_PM_ENDPT = rmc->mp_endpoint;
@@ -248,7 +247,7 @@ int do_exit()
       exit_proc(mp, m_in.m_lc_pm_exit.status, FALSE /*dump_core*/);
   }
 
-  printf("Minix (210020047): PID %d exited\n", _ENDPOINT_P(mp->mp_pid));
+  printf("Minix (210020047): PID %d created with endpoint %d\n", mp->mp_pid, _ENDPOINT_P(mp->mp_endpoint));
 
   return(SUSPEND);		/* can't communicate from beyond the grave */
 }
