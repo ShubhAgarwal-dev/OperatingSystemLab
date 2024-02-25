@@ -1,5 +1,11 @@
 #include <bits/stdc++.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
 using namespace std;
+#define SLEEP_TIME 10
 
 double GRAYSCALE[3] = {0.299, 0.587, 0.114};
 
@@ -58,31 +64,42 @@ void readFile(ifstream &originalFile, Image *image)
     }
 }
 
-void toGrayscale(Image *image)
-{
-    int n = image->colorSpace[0].size();
-    for (int i = 0; i < n; i++)
-    {
-        double newValue = 0.0;
-        for (int j = 0; j < 3; j++)
-            newValue += (double)image->colorSpace[j][i] * GRAYSCALE[j];
-        for (int j = 0; j < 3; j++)
-            image->colorSpace[j][i] = newValue;
+void toGrayscale(Image *image, int *red, int *green, int *blue){
+    int n = image->width * image->height;
+    for (int i=0; i<n; i++){
+        double new_val = (double)red[i]*GRAYSCALE[0] + (double)green[i]*GRAYSCALE[1] + (double)blue[i]*GRAYSCALE[2];
+        red[i] = blue[i] = green[i] = new_val;
     }
 }
 
-void toInvert(Image *image)
-{
+void fill_shared_memory(Image *image, int *red, int *green, int *blue){
     int n = image->colorSpace[0].size();
-    for (int i = 0; i < n; i++)
-    {
+    for (int i=0; i<n; i++){
+        red[i] = image->colorSpace[0][i];
+        green[i] = image->colorSpace[1][i];
+        blue[i] = image->colorSpace[2][i];
+    }
+}
+
+void dump_shared_memory(Image *image, int *red, int *green, int *blue){
+    int n = image->colorSpace[0].size();
+    for (int i=0; i<n; i++){
+        image->colorSpace[0][i] = red[i];
+        image->colorSpace[1][i] = green[i];
+        image->colorSpace[2][i] = blue[i];
+    }
+}
+
+void toInvert(Image *image, int *red, int *green, int *blue){
+    int n = image->width * image->height;
+    for (int i=0; i<n; i++){
         int R, G, B;
-        R = image->colorSpace[0][i];
-        G = image->colorSpace[1][i];
-        B = image->colorSpace[2][i];
-        image->colorSpace[0][i] = 255 - (G + B) / 2;
-        image->colorSpace[1][i] = 255 - (R + B) / 2;
-        image->colorSpace[2][i] = 255 - (G + R) / 2;
+        R = red[i];
+        G = green[i];
+        B = blue[i];
+        red[i] = 255 - (G + B) / 2;
+        green[i] = 255 - (R + B) / 2;
+        blue[i] = 255 - (G + R) / 2;
     }
 }
 
@@ -108,14 +125,36 @@ int main(int argc, char const *argv[])
     Image image;
     ifstream originalFile;
     ofstream outputFile;
+    key_t key_blue = ftok(argv[2], 69);
+    key_t key_green = ftok(argv[2], 70);
+    key_t key_red = ftok(argv[2], 71);
+    if (key_blue == -1 || key_green == -1 || key_red == -1){
+        cout << "KEY_GEN_ERROR" << endl;
+        return -1;
+    }
+    cout << key_red  << "\t" << key_blue << "\t" << key_green << endl;
     originalFile.open(argv[1]);
     outputFile.open(argv[2]);
     readFile(originalFile, &image);
-    // cout << "Read successful!!\n";
-    toGrayscale(&image);
-    toInvert(&image);
+    int buffer_size = sizeof(int) * image.height * image.width;
+    int shmid_blue = shmget(key_blue, buffer_size, 0666 | IPC_CREAT);
+    int shmid_red = shmget(key_red, buffer_size, 0666 | IPC_CREAT);
+    int shmid_green = shmget(key_green, buffer_size, 0666 | IPC_CREAT);
+    int *blue = (int *) shmat(shmid_blue, NULL,0);
+    int *green = (int *) shmat(shmid_green, NULL,0);
+    int *red = (int *) shmat(shmid_red, NULL,0);
+    pid_t pid;
+    fill_shared_memory(&image, red, green, blue);
+    if ((pid = fork()) == 0){
+        toGrayscale(&image, red, green, blue);
+        exit(0);
+    } else {
+        toInvert(&image, red, green, blue);
+        wait(NULL);
+    }
+    dump_shared_memory(&image, red, green, blue);
     writeToFile(outputFile, &image);
-    // cout << "Write successful!!\n";
+    cout << "Write successful!!\n";
     outputFile.close();
     originalFile.close();
 }

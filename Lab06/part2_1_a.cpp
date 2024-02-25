@@ -3,6 +3,7 @@
 #include <thread>
 
 using namespace std;
+mutex m1;
 
 double GRAYSCALE[3] = {0.299, 0.587, 0.114};
 
@@ -61,7 +62,7 @@ void readFile(ifstream &originalFile, Image *image)
 
 void toGrayscale(Image *image)
 {
-
+    m1.lock();
     int n = image->colorSpace[0].size();
     for (int i = 0; i < n; i++)
     {
@@ -71,10 +72,12 @@ void toGrayscale(Image *image)
         for (int j = 0; j < 3; j++)
             image->colorSpace[j][i] = newValue;
     }
+    m1.unlock();
 }
 
 void toInvert(Image *image)
 {
+    m1.lock();
     int n = image->colorSpace[0].size();
     for (int i = 0; i < n; i++)
     {
@@ -86,6 +89,7 @@ void toInvert(Image *image)
         image->colorSpace[1][i] = 255 - (R + B) / 2;
         image->colorSpace[2][i] = 255 - (G + R) / 2;
     }
+    m1.unlock();
 }
 
 void writeToFile(ofstream &outputFile, Image *image)

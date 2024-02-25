@@ -8,7 +8,6 @@ using namespace std;
 #define SLEEP_TIME 10
 
 double GRAYSCALE[3] = {0.299, 0.587, 0.114};
-mutex m1, m2;
 sem_t sem;
 int ret = sem_init(&sem, 0, 0);
 
@@ -67,28 +66,23 @@ void readFile(ifstream &originalFile, Image *image)
 
 void toGrayscale(Image *image)
 {
-    // sleep(SLEEP_TIME);
     int n = image->colorSpace[0].size();
     for (int i = 0; i < n; i++)
     {
-        // m1.lock();
         double newValue = 0.0;
         for (int j = 0; j < 3; j++)
             newValue += (double)image->colorSpace[j][i] * GRAYSCALE[j];
         for (int j = 0; j < 3; j++)
             image->colorSpace[j][i] = newValue;
         sem_post(&sem);
-        // m1.unlock();
     }
 }
 
 void toInvert(Image *image)
 {
-    // sleep(SLEEP_TIME);
     int n = image->colorSpace[0].size();
     for (int i = 0; i < n; i++)
     {
-        // m2.lock();
         sem_wait(&sem);
         int R, G, B;
         R = image->colorSpace[0][i];
@@ -97,7 +91,6 @@ void toInvert(Image *image)
         image->colorSpace[0][i] = 255 - (G + B) / 2;
         image->colorSpace[1][i] = 255 - (R + B) / 2;
         image->colorSpace[2][i] = 255 - (G + R) / 2;
-        // m2.unlock();
     }
 }
 
