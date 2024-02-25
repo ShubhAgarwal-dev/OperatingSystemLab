@@ -7,4 +7,4 @@ exec:
 	${CC} part2_3.cpp -o part2_3
 
 test:
-	${CC} part2_2.cpp -o part1 -pthread && time ./part1 inputs_ppm/sample_pp3_5mb.ppm output_ppm/sample5_22
+	(./runall.sh 2>&1) | tee log

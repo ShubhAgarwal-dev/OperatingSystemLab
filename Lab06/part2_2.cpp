@@ -64,35 +64,46 @@ void readFile(ifstream &originalFile, Image *image)
     }
 }
 
-void toGrayscale(Image *image, int *red, int *green, int *blue){
-    int n = image->width * image->height;
-    for (int i=0; i<n; i++){
-        double new_val = (double)red[i]*GRAYSCALE[0] + (double)green[i]*GRAYSCALE[1] + (double)blue[i]*GRAYSCALE[2];
-        red[i] = blue[i] = green[i] = new_val;
-    }
-}
-
-void fill_shared_memory(Image *image, int *red, int *green, int *blue){
+void fill_shared_memory(Image *image, int *red, int *green, int *blue)
+{
     int n = image->colorSpace[0].size();
-    for (int i=0; i<n; i++){
+    for (int i = 0; i < n; i++)
+    {
         red[i] = image->colorSpace[0][i];
         green[i] = image->colorSpace[1][i];
         blue[i] = image->colorSpace[2][i];
     }
+    cout << "Fill working\n";
 }
 
-void dump_shared_memory(Image *image, int *red, int *green, int *blue){
+void dump_shared_memory(Image *image, int *red, int *green, int *blue)
+{
     int n = image->colorSpace[0].size();
-    for (int i=0; i<n; i++){
+    for (int i = 0; i < n; i++)
+    {
         image->colorSpace[0][i] = red[i];
         image->colorSpace[1][i] = green[i];
         image->colorSpace[2][i] = blue[i];
     }
+    cout << "Dump working\n";
 }
 
-void toInvert(Image *image, int *red, int *green, int *blue){
+void toGrayscale(Image *image, int *red, int *green, int *blue)
+{
     int n = image->width * image->height;
-    for (int i=0; i<n; i++){
+    for (int i = 0; i < n; i++)
+    {
+        double new_val = (double)red[i] * GRAYSCALE[0] + (double)green[i] * GRAYSCALE[1] + (double)blue[i] * GRAYSCALE[2];
+        red[i] = blue[i] = green[i] = new_val;
+    }
+    cout << "Grayscale working\n";
+}
+
+void toInvert(Image *image, int *red, int *green, int *blue)
+{
+    int n = image->width * image->height;
+    for (int i = 0; i < n; i++)
+    {
         int R, G, B;
         R = red[i];
         G = green[i];
@@ -101,6 +112,7 @@ void toInvert(Image *image, int *red, int *green, int *blue){
         green[i] = 255 - (R + B) / 2;
         blue[i] = 255 - (G + R) / 2;
     }
+    cout << "Invert working\n";
 }
 
 void writeToFile(ofstream &outputFile, Image *image)
@@ -125,36 +137,39 @@ int main(int argc, char const *argv[])
     Image image;
     ifstream originalFile;
     ofstream outputFile;
-    key_t key_blue = ftok(argv[2], 69);
-    key_t key_green = ftok(argv[2], 70);
-    key_t key_red = ftok(argv[2], 71);
-    if (key_blue == -1 || key_green == -1 || key_red == -1){
-        cout << "KEY_GEN_ERROR" << endl;
-        return -1;
-    }
-    cout << key_red  << "\t" << key_blue << "\t" << key_green << endl;
+    key_t key_blue = ftok(argv[2], 'a');
+    key_t key_green = ftok(argv[2], 'b');
+    key_t key_red = ftok(argv[2], 'c');
     originalFile.open(argv[1]);
     outputFile.open(argv[2]);
     readFile(originalFile, &image);
-    int buffer_size = sizeof(int) * image.height * image.width;
-    int shmid_blue = shmget(key_blue, buffer_size, 0666 | IPC_CREAT);
-    int shmid_red = shmget(key_red, buffer_size, 0666 | IPC_CREAT);
-    int shmid_green = shmget(key_green, buffer_size, 0666 | IPC_CREAT);
-    int *blue = (int *) shmat(shmid_blue, NULL,0);
-    int *green = (int *) shmat(shmid_green, NULL,0);
-    int *red = (int *) shmat(shmid_red, NULL,0);
-    pid_t pid;
+    int numPixels = sizeof(int) * image.height * image.width;
+    int shmid_blue = shmget(key_blue, numPixels, 0666 | IPC_CREAT);
+    int shmid_red = shmget(key_red, numPixels, 0666 | IPC_CREAT);
+    int shmid_green = shmget(key_green, numPixels, 0666 | IPC_CREAT);
+    if (shmid_red == -1 || shmid_green == -1 || shmid_blue == -1)
+    {
+        cout << "SHMGET fault\n";
+        return 1;
+    }
+    int *blue = (int *)shmat(shmid_blue, NULL, 0);
+    int *green = (int *)shmat(shmid_green, NULL, 0);
+    int *red = (int *)shmat(shmid_red, NULL, 0);
     fill_shared_memory(&image, red, green, blue);
-    if ((pid = fork()) == 0){
+    pid_t pid = fork();
+    if (pid == 0)
+    {
         toGrayscale(&image, red, green, blue);
         exit(0);
-    } else {
-        toInvert(&image, red, green, blue);
+    }
+    else
+    {
         wait(NULL);
+        toInvert(&image, red, green, blue);
     }
     dump_shared_memory(&image, red, green, blue);
     writeToFile(outputFile, &image);
-    cout << "Write successful!!\n";
     outputFile.close();
     originalFile.close();
+    return 0;
 }
