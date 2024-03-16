@@ -6,10 +6,10 @@ using namespace std;
 class Memory: public MemoryBaseClass
 {
 private:
-	queue<int> in_memory_pages;
+	vector<int> in_memory_pages;
 public:
 	Memory(int psize, int ssize)
-	: MemoryBaseClass(psize, ssize) {
+		: MemoryBaseClass(psize, ssize) {
 		return;
 	}
 
@@ -29,8 +29,10 @@ public:
 		if (in_memory_pages.size() < pmem_size) {
 			page_table[page_number].PFN = rand();
 		} else {
-			int victim = in_memory_pages.front();
-			in_memory_pages.pop();
+			int random_index = rand() % in_memory_pages.size();
+			int victim = in_memory_pages.at(random_index);
+			in_memory_pages[random_index] = page_number;
+			// in_memory_pages.erase(in_memory_pages.begin() + random_index);
 			if (swap.size() < swap_size) {
 				swap.insert(victim);
 			} else {
@@ -43,14 +45,14 @@ public:
 			page_table[victim].present = false;
 			page_table[page_number].PFN = page_table[victim].PFN;
 		}
-		in_memory_pages.push(page_number);
+		// in_memory_pages.push_back(page_number);
 		page_table[page_number].present = true;
 	}
 };
 
 int main(int argc, char *argv[]) {
 	if (argc != 5 && !DEBUG_MODE) {
-		cout << "./fifo <Addressable Pages> <Pages in Main Memory> <Swap Space> <Page Access Sequnce File>" << endl;
+		cout << "./random <Addressable Pages> <Pages in Main Memory> <Swap Space> <Page Access Sequnce File>" << endl;
 		exit(1);
 	}
 
@@ -79,7 +81,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Number of page faults: " << mem.get_page_fault() << endl;
 	cout << "Total number of accesses: " << page_accesses.size() << endl;
-	cout << "Page fault ratio: " << (double)mem.get_page_fault()/page_accesses.size() << endl;
+	cout << "Page fault ratio: " << (double)mem.get_page_fault() / page_accesses.size() << endl;
 
 	delete[] page_table;
 }

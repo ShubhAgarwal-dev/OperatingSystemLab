@@ -9,7 +9,7 @@ private:
 	queue<int> in_memory_pages;
 public:
 	Memory(int psize, int ssize)
-	: MemoryBaseClass(psize, ssize) {
+		: MemoryBaseClass(psize, ssize) {
 		return;
 	}
 
@@ -18,11 +18,24 @@ public:
 		if (pte.present) {
 			DEBUG_MODE && cout << "PAGE HIT OCCOUR" << endl;
 			page_hit += 1;
+			shufle_memory(page_number);
 		} else {
 			DEBUG_MODE && cout << "PAGE FAULT OCCOUR" << endl;
 			page_fault += 1;
 			handle_page_fault(page_number, page_table);
 		}
+	}
+
+	void shufle_memory(int page_number) {
+		queue<int> temp_queue;
+		while (in_memory_pages.size() != 0) {
+			int ele = in_memory_pages.front();
+			in_memory_pages.pop();
+			if (ele != page_number)
+				temp_queue.push(ele);
+		}
+		in_memory_pages = temp_queue;
+		in_memory_pages.push(page_number);
 	}
 
 	void handle_page_fault(int page_number, PTE *page_table) {
@@ -79,7 +92,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Number of page faults: " << mem.get_page_fault() << endl;
 	cout << "Total number of accesses: " << page_accesses.size() << endl;
-	cout << "Page fault ratio: " << (double)mem.get_page_fault()/page_accesses.size() << endl;
+	cout << "Page fault ratio: " << (double)mem.get_page_fault() / page_accesses.size() << endl;
 
 	delete[] page_table;
 }
