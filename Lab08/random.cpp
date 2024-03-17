@@ -31,8 +31,8 @@ public:
 		} else {
 			int random_index = rand() % in_memory_pages.size();
 			int victim = in_memory_pages.at(random_index);
-			in_memory_pages[random_index] = page_number;
-			// in_memory_pages.erase(in_memory_pages.begin() + random_index);
+			// in_memory_pages[random_index] = page_number;
+			in_memory_pages.erase(in_memory_pages.begin() + random_index);
 			if (swap.size() < swap_size) {
 				swap.insert(victim);
 			} else {
@@ -45,7 +45,7 @@ public:
 			page_table[victim].present = false;
 			page_table[page_number].PFN = page_table[victim].PFN;
 		}
-		// in_memory_pages.push_back(page_number);
+		in_memory_pages.push_back(page_number);
 		page_table[page_number].present = true;
 	}
 };

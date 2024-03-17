@@ -2,7 +2,7 @@
 #define __IITDH_CS312_LAB08_UTILS__
 
 #include <bits/stdc++.h>
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 typedef struct PTE {
 	// PTE inspiration taken from Page 8 of Lecture 23-24, OS
@@ -12,6 +12,13 @@ typedef struct PTE {
 	bool present;
 	bool dirty;
 	bool accessed;
+	PTE() {
+		valid = false;
+		protection = false;
+		present = false;
+		dirty = false;
+		accessed = false;
+	}
 } PTE;
 
 // std::vector<page_table>;
